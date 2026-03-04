@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 
 import {
@@ -25,9 +26,12 @@ export default function Index() {
   const [sentence, setSentence] = useState("");
   const [romanization, setRomanization] = useState("");
   const [translation, setTranslation] = useState("");
-  const [grammarPoint, setGrammarPoint] = useState("");
+  const [grammarPoint, setGrammarPoint] = useState<any>(null);
   const [words, setWords] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+
+  const { grammar } = useLocalSearchParams();
+  const router = useRouter();
 
   useEffect(() => {
     handleGenerate();
@@ -48,15 +52,27 @@ export default function Index() {
     return grammarPoints[Math.floor(Math.random() * grammarPoints.length)];
   }
 
+  function findGrammarById(id: string) {
+    return grammarPoints.find((g) => g.id === id);
+  }
+
   const handleGenerate = async () => {
     try {
       setLoading(true);
 
       const randomWords = getRandomWords(3);
-      const grammar = getRandomGrammar();
-      setGrammarPoint(grammar);
 
-      const result = await generateSentence(randomWords, grammar);
+      const grammarObject =
+        typeof grammar === "string"
+          ? findGrammarById(grammar) || getRandomGrammar()
+          : getRandomGrammar();
+
+      setGrammarPoint(grammarObject);
+
+      const result = await generateSentence(
+        randomWords,
+        grammarObject.aiPrompt,
+      );
 
       setSentence(result.sentence);
       setRomanization(result.romanization);
@@ -86,7 +102,10 @@ export default function Index() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
-        <Header />
+        <Header
+          title={grammarPoint ? `Grammar: ${grammarPoint.title}` : "Grammar"}
+          onBack={() => router.replace("/grammar")}
+        />
 
         {loading ? (
           <View style={styles.loadingContainer}>
@@ -102,7 +121,7 @@ export default function Index() {
               thai={sentence}
               romanization={romanization}
               english={translation}
-              grammarPoint={grammarPoint}
+              grammarPoint={grammarPoint?.title}
             />
 
             <View style={styles.wordScrapsSection}>
@@ -205,7 +224,6 @@ const styles = StyleSheet.create({
     borderRadius: 35,
     borderWidth: 2,
     borderColor: "#797979",
-
     alignItems: "center",
     justifyContent: "center",
   },
