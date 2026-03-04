@@ -5,13 +5,13 @@
 
 import { Platform } from 'react-native';
 
-const tintColorLight = '#0a7ea4';
+const tintColorLight = '#000000'; // Black text for active
 const tintColorDark = '#fff';
 
 export const Colors = {
   light: {
     text: '#11181C',
-    background: '#fff',
+    background: '#F5F5F5', // Light grey like the image
     tint: tintColorLight,
     icon: '#687076',
     tabIconDefault: '#687076',

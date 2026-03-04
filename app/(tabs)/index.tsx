@@ -1,78 +1,109 @@
-import { useState } from "react";
-import { Button, Text, View } from "react-native";
-import { generateSentence } from "../../src/api/generateSentence";
-import { grammarPoints } from "../../src/data/grammar";
-import { vocabulary } from "../../src/data/words";
+import { useState, useEffect } from "react";
+import { ScrollView, View, StyleSheet, Text, SafeAreaView } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import Header from "../../src/components/Header";
+import TranslateCard from "../../src/components/TranslateCard";
+import WordCard from "../../src/components/WordCard";
+import StatsCard from "../../src/components/StatsCard";
+import GenerateButton from "../../src/components/GenerateButton";
+
+// Mock data to match screenshot
+const INITIAL_WORDS = [
+  { thai: "ครู", english: "TEACHER", color: "#42A5F5", rotation: -2 },
+  { thai: "วันนี้", english: "TODAY", color: "#FF4081", rotation: 2 },
+  { thai: "มา", english: "COME", color: "#66BB6A", rotation: -1 },
+  { thai: "ไหม", english: "QUESTION?", color: "#FF9800", rotation: 3 },
+  { thai: "เขา", english: "HE/SHE", color: "#AB47BC", rotation: -3 },
+];
 
 export default function Index() {
-  const [sentence, setSentence] = useState("");
-  const [romanization, setRomanization] = useState("");
-  const [translation, setTranslation] = useState("");
-  const [breakdown, setBreakdown] = useState<any[]>([]);
+  const [sentence, setSentence] = useState("ครูเขามาวันนี้ไหม");
+  const [romanization, setRomanization] = useState("Kru-kao-ma-wan-nee-mai?");
+  const [words, setWords] = useState(INITIAL_WORDS);
 
-  const [grammar, setGrammar] = useState("");
-  const [words, setWords] = useState<string[]>([]);
-
-  function getRandomWords(count = 3) {
-    const selected: string[] = [];
-
-    for (let i = 0; i < count; i++) {
-      const word = vocabulary[Math.floor(Math.random() * vocabulary.length)];
-      selected.push(word);
-    }
-
-    return selected;
-  }
-
-  function getRandomGrammar() {
-    return grammarPoints[Math.floor(Math.random() * grammarPoints.length)];
-  }
-
-  async function handleGenerate() {
-    const randomWords = getRandomWords(3);
-    const grammarRule = getRandomGrammar();
-
-    setWords(randomWords);
-    setGrammar(grammarRule);
-
-    const result = await generateSentence(randomWords, grammarRule);
-
-    console.log(result);
-
-    setSentence(result.sentence);
-    setRomanization(result.romanization);
-    setTranslation(result.translation);
-    setBreakdown(result.breakdown);
-  }
+  const handleGenerate = () => {
+    // In a real app, we would call the API here
+    // For now, let's keep the mock data from the image
+    console.log("Generating next sentence...");
+  };
 
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        padding: 20,
-      }}
-    >
-      <Text style={{ fontSize: 18, marginBottom: 10 }}>
-        Words: {words.join(", ")}
-      </Text>
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Header />
 
-      <Text style={{ fontSize: 18, marginBottom: 10 }}>Grammar: {grammar}</Text>
+        <TranslateCard thai={sentence} romanization={romanization} />
 
-      <Text style={{ fontSize: 28, marginBottom: 10 }}>{sentence}</Text>
+        <View style={styles.wordScrapsSection}>
+          <View style={styles.wordScrapsHeader}>
+            <Ionicons name="cut-outline" size={24} color="black" />
+            <Text style={styles.wordScrapsTitle}>WORDSCRAPS</Text>
+          </View>
 
-      <Text style={{ fontSize: 18, marginBottom: 10 }}>{romanization}</Text>
+          <View style={styles.wordCardsGrid}>
+            <View style={styles.row}>
+              {words.slice(0, 4).map((word, idx) => (
+                <WordCard
+                  key={idx}
+                  thai={word.thai}
+                  english={word.english}
+                  backgroundColor={word.color}
+                  rotation={word.rotation}
+                />
+              ))}
+            </View>
+            <View style={styles.row}>
+              {words.slice(4).map((word, idx) => (
+                <WordCard
+                  key={idx}
+                  thai={word.thai}
+                  english={word.english}
+                  backgroundColor={word.color}
+                  rotation={word.rotation}
+                />
+              ))}
+            </View>
+          </View>
+        </View>
 
-      <Text style={{ fontSize: 18, marginBottom: 20 }}>{translation}</Text>
+        <StatsCard streak={12} />
 
-      {breakdown.map((item, index) => (
-        <Text key={index}>
-          {item.thai} → {item.english}
-        </Text>
-      ))}
-
-      <Button title="Generate Sentence" onPress={handleGenerate} />
-    </View>
+        <GenerateButton onPress={handleGenerate} />
+      </ScrollView>
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#F5F5F5', // Light grey background
+  },
+  container: {
+    paddingBottom: 40,
+  },
+  wordScrapsSection: {
+    marginTop: 40,
+    paddingHorizontal: 20,
+  },
+  wordScrapsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  wordScrapsTitle: {
+    fontSize: 22,
+    fontWeight: '900',
+    marginLeft: 10,
+    letterSpacing: 1,
+  },
+  wordCardsGrid: {
+    alignItems: 'center',
+  },
+  row: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    marginBottom: 10,
+  },
+});
