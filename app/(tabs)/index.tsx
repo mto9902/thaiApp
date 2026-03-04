@@ -17,6 +17,8 @@ const COLORS = ["#42A5F5", "#FF4081", "#66BB6A", "#FF9800", "#AB47BC"];
 export default function Index() {
   const [sentence, setSentence] = useState("");
   const [romanization, setRomanization] = useState("");
+  const [translation, setTranslation] = useState("");
+  const [grammarPoint, setGrammarPoint] = useState("");
   const [words, setWords] = useState<any[]>([]);
 
   function getRandomWords(count = 3) {
@@ -38,11 +40,17 @@ export default function Index() {
     try {
       const randomWords = getRandomWords(3);
       const grammar = getRandomGrammar();
+      setGrammarPoint(grammar);
 
       const result = await generateSentence(randomWords, grammar);
 
       setSentence(result.sentence);
       setRomanization(result.romanization);
+      // Use translation from API if available, otherwise join breakdown words
+      setTranslation(
+        result.translation ||
+          (result.breakdown || []).map((w: any) => w.english).join(" "),
+      );
 
       // convert AI breakdown → WordCard format
       const formattedWords = (result.breakdown || []).map(
@@ -65,7 +73,12 @@ export default function Index() {
       <ScrollView contentContainerStyle={styles.container}>
         <Header />
 
-        <TranslateCard thai={sentence} romanization={romanization} />
+        <TranslateCard
+          thai={sentence}
+          romanization={romanization}
+          english={translation}
+          grammarPoint={grammarPoint}
+        />
 
         <View style={styles.wordScrapsSection}>
           <View style={styles.wordScrapsHeader}>
