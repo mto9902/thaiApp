@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import * as Speech from "expo-speech";
 import { useEffect, useRef, useState } from "react";
 
 import {
@@ -72,6 +73,14 @@ export default function Index() {
   useEffect(() => {
     handleGenerate();
   }, [grammar]);
+
+  const speakWord = (word: string) => {
+    Speech.stop();
+    Speech.speak(word, {
+      language: "th-TH",
+      rate: 0.9,
+    });
+  };
 
   function getRandomWords(count = 3) {
     const selected: string[] = [];
@@ -169,6 +178,7 @@ export default function Index() {
                       english={word.english}
                       backgroundColor={word.color}
                       rotation={word.rotation}
+                      onPress={() => speakWord(word.thai)}
                     />
                   ))}
                 </View>
@@ -181,6 +191,7 @@ export default function Index() {
                       english={word.english}
                       backgroundColor={word.color}
                       rotation={word.rotation}
+                      onPress={() => speakWord(word.thai)}
                     />
                   ))}
                 </View>
@@ -196,50 +207,32 @@ export default function Index() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#F5F5F5",
-  },
-
-  container: {
-    paddingBottom: 40,
-  },
-
-  wordScrapsSection: {
-    marginTop: 40,
-    paddingHorizontal: 20,
-  },
-
+  safeArea: { flex: 1, backgroundColor: "#F5F5F5" },
+  container: { paddingBottom: 40 },
+  wordScrapsSection: { marginTop: 40, paddingHorizontal: 20 },
   wordScrapsHeader: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 20,
   },
-
   wordScrapsTitle: {
     fontSize: 22,
     fontWeight: "900",
     marginLeft: 10,
     letterSpacing: 1,
   },
-
-  wordCardsGrid: {
-    alignItems: "center",
-  },
-
+  wordCardsGrid: { alignItems: "center" },
   row: {
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "center",
     marginBottom: 10,
   },
-
   loadingContainer: {
     alignItems: "center",
     justifyContent: "center",
     paddingTop: 80,
   },
-
   loadingBox: {
     backgroundColor: "#FFFF00",
     borderWidth: 4,
@@ -253,20 +246,11 @@ const styles = StyleSheet.create({
     shadowRadius: 0,
     marginBottom: 30,
   },
-
   thinkingLabel: {
     fontSize: 12,
     fontWeight: "900",
-    color: "black",
     marginBottom: 10,
     letterSpacing: 2,
   },
-
-  loadingText: {
-    fontSize: 24,
-    fontWeight: "900",
-    color: "black",
-    letterSpacing: 1,
-    textAlign: "center",
-  },
+  loadingText: { fontSize: 24, fontWeight: "900", textAlign: "center" },
 });

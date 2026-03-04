@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import * as Speech from "expo-speech";
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
@@ -23,6 +24,14 @@ export default function TranslateCard({
   english,
   grammarPoint = "FORMING QUESTIONS",
 }: TranslateCardProps) {
+  const playAudio = () => {
+    Speech.speak(sentence, {
+      language: "th-TH",
+      rate: 0.9,
+      pitch: 1.0,
+    });
+  };
+
   return (
     <View style={styles.outerContainer}>
       <View style={styles.card}>
@@ -49,7 +58,7 @@ export default function TranslateCard({
           )}
         </View>
 
-        <TouchableOpacity style={styles.audioButton}>
+        <TouchableOpacity style={styles.audioButton} onPress={playAudio}>
           <Ionicons name="volume-high" size={32} color="black" />
         </TouchableOpacity>
 
