@@ -10,6 +10,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 
 import { grammarPoints } from "../../src/data/grammar";
+import Header from "../../src/components/Header";
 
 export default function GrammarDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -44,49 +45,64 @@ export default function GrammarDetail() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.replace("/grammar")}
-        >
-          <Ionicons name="arrow-back" size={24} color="black" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Lesson</Text>
-        <View style={{ width: 40 }} />
-      </View>
+      <Header title="LESSON" onBack={() => router.replace("/grammar")} />
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.titleSection}>
-          <Text style={styles.title}>{grammar.title}</Text>
           <View style={styles.levelBadge}>
             <Text style={styles.levelText}>LEVEL {grammar.level}</Text>
+          </View>
+          <View style={styles.titleCard}>
+            <Text style={styles.title}>{grammar.title.toUpperCase()}</Text>
           </View>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Concept</Text>
-          <Text style={styles.explanation}>{explanation}</Text>
+          <Text style={styles.sectionLabel}>CONCEPT</Text>
+          <View style={styles.conceptCard}>
+            <Text style={styles.explanation}>{explanation}</Text>
+          </View>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Sentence Pattern</Text>
+          <Text style={styles.sectionLabel}>SENTENCE PATTERN</Text>
           <View style={styles.patternCard}>
             <Text style={styles.patternText}>{pattern}</Text>
           </View>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Example</Text>
+          <Text style={styles.sectionLabel}>EXAMPLE</Text>
           <View style={styles.exampleCard}>
+            <View style={styles.exampleHeader}>
+              <Ionicons name="megaphone-outline" size={24} color="black" />
+              <Text style={styles.exampleHeaderText}>PRACTICE THIS</Text>
+            </View>
             <Text style={styles.thaiText}>{example.thai}</Text>
-            <Text style={styles.romanText}>{example.roman}</Text>
-            <Text style={styles.englishText}>{example.english}</Text>
+            <View style={styles.divider} />
+            <Text style={styles.romanText}>"{example.roman}"</Text>
+            <View style={styles.englishContainer}>
+              <Text style={styles.englishText}>{example.english}</Text>
+            </View>
 
             <View style={styles.breakdownContainer}>
               {example.breakdown.map((item, index) => (
-                <View key={index} style={styles.breakdownItem}>
+                <View
+                  key={index}
+                  style={[
+                    styles.breakdownCard,
+                    {
+                      backgroundColor:
+                        ["#FFCC00", "#FF66CC", "#66CCFF", "#99FF66"][
+                          index % 4
+                        ],
+                    },
+                  ]}
+                >
                   <Text style={styles.breakdownThai}>{item.thai}</Text>
-                  <Text style={styles.breakdownEnglish}>{item.english}</Text>
+                  <Text style={styles.breakdownEnglish}>
+                    {item.english.toUpperCase()}
+                  </Text>
                 </View>
               ))}
             </View>
@@ -94,10 +110,15 @@ export default function GrammarDetail() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Grammar Focus</Text>
+          <Text style={styles.sectionLabel}>GRAMMAR FOCUS</Text>
           <View style={styles.focusCard}>
-            <Text style={styles.focusParticle}>{focus.particle}</Text>
-            <Text style={styles.focusMeaning}>{focus.meaning}</Text>
+            <View style={styles.focusIcon}>
+              <Ionicons name="star" size={20} color="black" />
+            </View>
+            <View style={styles.focusContent}>
+              <Text style={styles.focusParticle}>{focus.particle}</Text>
+              <Text style={styles.focusMeaning}>{focus.meaning}</Text>
+            </View>
           </View>
         </View>
 
@@ -110,8 +131,8 @@ export default function GrammarDetail() {
             })
           }
         >
-          <Text style={styles.ctaText}>Start Practice</Text>
-          <Ionicons name="arrow-forward" size={20} color="white" />
+          <Text style={styles.ctaText}>START PRACTICE</Text>
+          <Ionicons name="flash" size={24} color="black" />
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
@@ -121,157 +142,247 @@ export default function GrammarDetail() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F8F9FA",
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    backgroundColor: "white",
-    borderBottomWidth: 1,
-    borderBottomColor: "#E9ECEF",
-  },
-  backButton: {
-    padding: 8,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "700",
+    backgroundColor: "#F5F5F5",
   },
   scrollContent: {
     padding: 20,
-    paddingBottom: 40,
+    paddingBottom: 60,
   },
   titleSection: {
-    marginBottom: 25,
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: "900",
-    color: "#212529",
-    marginBottom: 8,
+    marginBottom: 30,
+    alignItems: "center",
   },
   levelBadge: {
-    alignSelf: "flex-start",
-    backgroundColor: "#007AFF",
+    backgroundColor: "black",
     paddingHorizontal: 12,
     paddingVertical: 4,
-    borderRadius: 20,
+    borderRadius: 4,
+    marginBottom: -10,
+    zIndex: 1,
   },
   levelText: {
     color: "white",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "900",
+  },
+  titleCard: {
+    backgroundColor: "#FFFF00",
+    borderWidth: 3,
+    borderColor: "black",
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    width: "100%",
+    // Hard shadow
+    shadowColor: "#000",
+    shadowOffset: { width: 6, height: 6 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 5,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "900",
+    color: "black",
+    textAlign: "center",
   },
   section: {
-    marginBottom: 30,
+    marginBottom: 35,
   },
-  sectionTitle: {
+  sectionLabel: {
     fontSize: 14,
-    fontWeight: "700",
-    color: "#6C757D",
-    textTransform: "uppercase",
-    letterSpacing: 1,
-    marginBottom: 12,
+    fontWeight: "900",
+    color: "#757575",
+    marginBottom: 10,
+    letterSpacing: 2,
+  },
+  conceptCard: {
+    backgroundColor: "white",
+    borderWidth: 2,
+    borderColor: "black",
+    borderRadius: 12,
+    padding: 20,
+    // Comic shadow
+    shadowColor: "#000",
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
   },
   explanation: {
     fontSize: 17,
+    fontWeight: "600",
     lineHeight: 24,
-    color: "#495057",
+    color: "#333",
   },
   patternCard: {
     backgroundColor: "#E7F1FF",
     padding: 20,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "#CFE2FF",
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: "black",
+    // Comic shadow
+    shadowColor: "#000",
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
   },
   patternText: {
-    fontSize: 18,
-    fontWeight: "800",
+    fontSize: 20,
+    fontWeight: "900",
     color: "#0056B3",
     textAlign: "center",
-    letterSpacing: 0.5,
   },
   exampleCard: {
     backgroundColor: "white",
-    padding: 20,
-    borderRadius: 16,
+    padding: 25,
+    borderRadius: 20,
+    borderWidth: 3,
+    borderColor: "black",
+    // Large hard shadow
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 3,
+    shadowOffset: { width: 8, height: 8 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    alignItems: "center",
+  },
+  exampleHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 15,
+    gap: 8,
+  },
+  exampleHeaderText: {
+    fontSize: 12,
+    fontWeight: "900",
+    color: "black",
   },
   thaiText: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#212529",
-    marginBottom: 4,
+    fontSize: 42,
+    fontWeight: "bold",
+    color: "black",
+    textAlign: "center",
+    marginBottom: 10,
+  },
+  divider: {
+    height: 2,
+    backgroundColor: "#E0E0E0",
+    width: "100%",
+    marginVertical: 15,
   },
   romanText: {
-    fontSize: 16,
-    color: "#6C757D",
+    fontSize: 18,
     fontStyle: "italic",
-    marginBottom: 10,
+    color: "#757575",
+    textAlign: "center",
+    fontWeight: "600",
+    marginBottom: 15,
+  },
+  englishContainer: {
+    backgroundColor: "#FAFAFA",
+    padding: 15,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: "#E0E0E0",
+    borderStyle: "dashed",
+    width: "100%",
+    alignItems: "center",
+    marginBottom: 20,
   },
   englishText: {
     fontSize: 18,
-    color: "#495057",
-    marginBottom: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F1F3F5",
-    paddingBottom: 15,
+    fontWeight: "800",
+    color: "#333",
+    textAlign: "center",
   },
   breakdownContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 15,
+    justifyContent: "center",
+    gap: 12,
   },
-  breakdownItem: {
-    marginBottom: 5,
+  breakdownCard: {
+    padding: 10,
+    borderWidth: 2,
+    borderColor: "black",
+    borderRadius: 8,
+    alignItems: "center",
+    minWidth: 80,
+    // Small hard shadow
+    shadowColor: "#000",
+    shadowOffset: { width: 3, height: 3 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
   },
   breakdownThai: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#007AFF",
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "black",
   },
   breakdownEnglish: {
-    fontSize: 14,
-    color: "#6C757D",
+    fontSize: 10,
+    fontWeight: "900",
+    color: "black",
+    opacity: 0.8,
   },
   focusCard: {
+    flexDirection: "row",
     backgroundColor: "#FFF4E6",
-    padding: 16,
+    padding: 20,
     borderRadius: 12,
-    borderLeftWidth: 4,
-    borderLeftColor: "#FD7E14",
+    borderWidth: 2,
+    borderColor: "black",
+    // Hard shadow
+    shadowColor: "#000",
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    alignItems: "center",
+  },
+  focusIcon: {
+    width: 40,
+    height: 40,
+    backgroundColor: "#FD7E14",
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: "black",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 15,
+  },
+  focusContent: {
+    flex: 1,
   },
   focusParticle: {
-    fontSize: 18,
-    fontWeight: "800",
+    fontSize: 20,
+    fontWeight: "900",
     color: "#D9480F",
     marginBottom: 4,
   },
   focusMeaning: {
     fontSize: 15,
+    fontWeight: "700",
     color: "#862E08",
   },
   ctaButton: {
-    backgroundColor: "#212529",
+    backgroundColor: "#FFFF00",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 18,
+    paddingVertical: 20,
     borderRadius: 16,
-    marginTop: 10,
-    gap: 10,
+    borderWidth: 3,
+    borderColor: "black",
+    marginTop: 20,
+    gap: 12,
+    // Large hard shadow
+    shadowColor: "#000",
+    shadowOffset: { width: 6, height: 6 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 5,
   },
   ctaText: {
-    color: "white",
-    fontSize: 18,
-    fontWeight: "700",
+    color: "black",
+    fontSize: 22,
+    fontWeight: "900",
   },
 });

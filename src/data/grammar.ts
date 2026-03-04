@@ -127,6 +127,25 @@ export const grammarPoints: GrammarPoint[] = [
     aiPrompt:
       "Create a Thai sentence using มี to express possession or existence.",
     level: 1,
+    explanation:
+      "The word 'มี' (mee) is used to express both 'to have' (possession) and 'there is/are' (existence). The context usually makes it clear which one is meant.",
+    pattern: "SUBJECT + มี + OBJECT",
+    example: {
+      thai: "ฉันมีแมวสามตัว",
+      roman: "chǎn mee maew sǎam dtua",
+      english: "I have three cats.",
+      breakdown: [
+        { thai: "ฉัน", english: "I" },
+        { thai: "มี", english: "have" },
+        { thai: "แมว", english: "cat" },
+        { thai: "สาม", english: "three" },
+        { thai: "ตัว", english: "(classifier)" },
+      ],
+    },
+    focus: {
+      particle: "มี (mee)",
+      meaning: "Used for possession (I have) or existence (There is).",
+    },
   },
   {
     id: "yoo-location",
@@ -134,6 +153,23 @@ export const grammarPoints: GrammarPoint[] = [
     aiPrompt:
       "Create a Thai sentence using อยู่ to describe location or a current state.",
     level: 1,
+    explanation:
+      "The verb 'อยู่' (yòo) is used specifically for location. It tells you where someone or something is located. Do not confuse it with 'เป็น' which is for identity.",
+    pattern: "SUBJECT + อยู่ + LOCATION",
+    example: {
+      thai: "เขาอยู่บ้าน",
+      roman: "kǎo yòo bâan",
+      english: "He is at home.",
+      breakdown: [
+        { thai: "เขา", english: "he" },
+        { thai: "อยู่", english: "is (at)" },
+        { thai: "บ้าน", english: "home" },
+      ],
+    },
+    focus: {
+      particle: "อยู่ (yòo)",
+      meaning: "Used only for location or staying in a place.",
+    },
   },
   {
     id: "gap-with",
@@ -141,6 +177,25 @@ export const grammarPoints: GrammarPoint[] = [
     aiPrompt:
       "Create a Thai sentence using กับ to express doing something with someone.",
     level: 1,
+    explanation:
+      "The word 'กับ' (gàp) is used to say 'with' or 'and'. In a sentence, it connects a person to another person doing the same action.",
+    pattern: "PERSON A + VERB + กับ + PERSON B",
+    example: {
+      thai: "ผมกินข้าวกับเพื่อน",
+      roman: "phǒm gin kâao gàp phûean",
+      english: "I eat rice with a friend.",
+      breakdown: [
+        { thai: "ผม", english: "I" },
+        { thai: "กิน", english: "eat" },
+        { thai: "ข้าว", english: "rice" },
+        { thai: "กับ", english: "with" },
+        { thai: "เพื่อน", english: "friend" },
+      ],
+    },
+    focus: {
+      particle: "กับ (gàp)",
+      meaning: "Used to connect people or things, meaning 'with' or 'and'.",
+    },
   },
   {
     id: "mak-degree",
@@ -148,6 +203,23 @@ export const grammarPoints: GrammarPoint[] = [
     aiPrompt:
       "Create a Thai sentence using มาก to intensify an adjective or verb.",
     level: 1,
+    explanation:
+      "To say something is 'very' or 'a lot', add the word 'มาก' (mâak) after the adjective or verb you want to intensify.",
+    pattern: "ADJECTIVE / VERB + มาก",
+    example: {
+      thai: "อาหารอร่อยมาก",
+      roman: "aa-hǎan a-ròi mâak",
+      english: "The food is very delicious.",
+      breakdown: [
+        { thai: "อาหาร", english: "food" },
+        { thai: "อร่อย", english: "delicious" },
+        { thai: "มาก", english: "very" },
+      ],
+    },
+    focus: {
+      particle: "มาก (mâak)",
+      meaning: "Always placed AFTER the word it modifies to mean 'very' or 'a lot'.",
+    },
   },
   {
     id: "gamlang-progressive",
