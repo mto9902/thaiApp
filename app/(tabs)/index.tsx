@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Animated,
+  Easing,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -24,35 +25,31 @@ import { vocabulary } from "../../src/data/words";
 const COLORS = ["#42A5F5", "#FF4081", "#66BB6A", "#FF9800", "#AB47BC"];
 
 function ComicLoading() {
-  const pulseAnim = useRef(new Animated.Value(1)).current;
+  const rotateAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulseAnim, {
-          toValue: 1.2,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(pulseAnim, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ]),
+      Animated.timing(rotateAnim, {
+        toValue: 1,
+        duration: 1200,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      }),
     ).start();
   }, []);
+
+  const spin = rotateAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["0deg", "360deg"],
+  });
 
   return (
     <View style={styles.loadingContainer}>
       <View style={styles.loadingBox}>
         <Text style={styles.thinkingLabel}>THINKING...</Text>
-        <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
-          <Ionicons name="flash" size={60} color="#000" />
+        <Animated.View style={{ transform: [{ rotate: spin }] }}>
+          <Ionicons name="sync-outline" size={60} color="#000" />
         </Animated.View>
-        <View style={styles.spinnerWrapper}>
-          <ActivityIndicator size="small" color="#000" />
-        </View>
       </View>
       <Text style={styles.loadingText}>BUILDING A SENTENCE</Text>
     </View>
@@ -261,10 +258,6 @@ const styles = StyleSheet.create({
     color: "black",
     marginBottom: 10,
     letterSpacing: 2,
-  },
-
-  spinnerWrapper: {
-    marginTop: 15,
   },
 
   loadingText: {
