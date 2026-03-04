@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   View,
   SafeAreaView,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -41,6 +42,10 @@ export default function GrammarDetail() {
   const focus = grammar.focus || {
     particle: "Focus point",
     meaning: "The meaning of the key word.",
+  };
+
+  const handlePlayAudio = (text: string) => {
+    Alert.alert("Audio playback", `Playing: ${text}`);
   };
 
   return (
@@ -79,6 +84,14 @@ export default function GrammarDetail() {
               <Text style={styles.exampleHeaderText}>PRACTICE THIS</Text>
             </View>
             <Text style={styles.thaiText}>{example.thai}</Text>
+
+            <TouchableOpacity
+              style={styles.audioButton}
+              onPress={() => handlePlayAudio(example.thai)}
+            >
+              <Ionicons name="volume-high" size={28} color="black" />
+            </TouchableOpacity>
+
             <View style={styles.divider} />
             <Text style={styles.romanText}>"{example.roman}"</Text>
             <View style={styles.englishContainer}>
@@ -254,6 +267,22 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "900",
     color: "black",
+  },
+  audioButton: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    borderWidth: 2,
+    borderColor: "black",
+    justifyContent: "center",
+    alignItems: "center",
+    marginVertical: 5,
+    backgroundColor: "white",
+    // Subtler shadow for audio button
+    shadowColor: "#000",
+    shadowOffset: { width: 3, height: 3 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
   },
   thaiText: {
     fontSize: 42,
