@@ -1,10 +1,17 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
-import { SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+
+import {
+  ActivityIndicator,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 import GenerateButton from "../../src/components/GenerateButton";
 import Header from "../../src/components/Header";
-import StatsCard from "../../src/components/StatsCard";
 import TranslateCard from "../../src/components/TranslateCard";
 import WordCard from "../../src/components/WordCard";
 
@@ -20,6 +27,11 @@ export default function Index() {
   const [translation, setTranslation] = useState("");
   const [grammarPoint, setGrammarPoint] = useState("");
   const [words, setWords] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    handleGenerate();
+  }, []);
 
   function getRandomWords(count = 3) {
     const selected: string[] = [];
@@ -38,6 +50,8 @@ export default function Index() {
 
   const handleGenerate = async () => {
     try {
+      setLoading(true);
+
       const randomWords = getRandomWords(3);
       const grammar = getRandomGrammar();
       setGrammarPoint(grammar);
@@ -46,13 +60,12 @@ export default function Index() {
 
       setSentence(result.sentence);
       setRomanization(result.romanization);
-      // Use translation from API if available, otherwise join breakdown words
+
       setTranslation(
         result.translation ||
           (result.breakdown || []).map((w: any) => w.english).join(" "),
       );
 
-      // convert AI breakdown → WordCard format
       const formattedWords = (result.breakdown || []).map(
         (w: any, i: number) => ({
           thai: w.thai,
@@ -65,6 +78,8 @@ export default function Index() {
       setWords(formattedWords);
     } catch (error) {
       console.error("Generation failed:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -73,49 +88,59 @@ export default function Index() {
       <ScrollView contentContainerStyle={styles.container}>
         <Header />
 
-        <TranslateCard
-          thai={sentence}
-          romanization={romanization}
-          english={translation}
-          grammarPoint={grammarPoint}
-        />
-
-        <View style={styles.wordScrapsSection}>
-          <View style={styles.wordScrapsHeader}>
-            <Ionicons name="cut-outline" size={24} color="black" />
-            <Text style={styles.wordScrapsTitle}>WORDSCRAPS</Text>
-          </View>
-
-          <View style={styles.wordCardsGrid}>
-            <View style={styles.row}>
-              {words.slice(0, 4).map((word, idx) => (
-                <WordCard
-                  key={idx}
-                  thai={word.thai}
-                  english={word.english}
-                  backgroundColor={word.color}
-                  rotation={word.rotation}
-                />
-              ))}
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <View style={styles.spinnerOutline}>
+              <ActivityIndicator size="large" color="#efff09" />
             </View>
 
-            <View style={styles.row}>
-              {words.slice(4).map((word, idx) => (
-                <WordCard
-                  key={idx}
-                  thai={word.thai}
-                  english={word.english}
-                  backgroundColor={word.color}
-                  rotation={word.rotation}
-                />
-              ))}
-            </View>
+            <Text style={styles.loadingText}>Building a sentence…</Text>
           </View>
-        </View>
+        ) : (
+          <>
+            <TranslateCard
+              thai={sentence}
+              romanization={romanization}
+              english={translation}
+              grammarPoint={grammarPoint}
+            />
 
-        <StatsCard streak={12} />
+            <View style={styles.wordScrapsSection}>
+              <View style={styles.wordScrapsHeader}>
+                <Ionicons name="cut-outline" size={24} color="black" />
+                <Text style={styles.wordScrapsTitle}>WORDSCRAPS</Text>
+              </View>
 
-        <GenerateButton onPress={handleGenerate} />
+              <View style={styles.wordCardsGrid}>
+                <View style={styles.row}>
+                  {words.slice(0, 4).map((word, idx) => (
+                    <WordCard
+                      key={idx}
+                      thai={word.thai}
+                      english={word.english}
+                      backgroundColor={word.color}
+                      rotation={word.rotation}
+                    />
+                  ))}
+                </View>
+
+                <View style={styles.row}>
+                  {words.slice(4).map((word, idx) => (
+                    <WordCard
+                      key={idx}
+                      thai={word.thai}
+                      english={word.english}
+                      backgroundColor={word.color}
+                      rotation={word.rotation}
+                    />
+                  ))}
+                </View>
+              </View>
+            </View>
+
+            <GenerateButton onPress={handleGenerate} />
+          </>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -158,5 +183,30 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     justifyContent: "center",
     marginBottom: 10,
+  },
+
+  loadingContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingTop: 80,
+  },
+
+  loadingText: {
+    marginTop: 14,
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#555",
+    letterSpacing: 0.3,
+  },
+
+  spinnerOutline: {
+    width: 30,
+    height: 30,
+    borderRadius: 35,
+    borderWidth: 2,
+    borderColor: "#797979",
+
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
