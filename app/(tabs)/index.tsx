@@ -103,7 +103,7 @@ export default function Index() {
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
         <Header
-          title={grammarPoint ? `Grammar: ${grammarPoint.title}` : "Grammar"}
+          title="Pradctice"
           onBack={() => router.replace("/grammar")}
         />
 
