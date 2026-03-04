@@ -1,9 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   ActivityIndicator,
+  Animated,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -21,6 +22,42 @@ import { grammarPoints } from "../../src/data/grammar";
 import { vocabulary } from "../../src/data/words";
 
 const COLORS = ["#42A5F5", "#FF4081", "#66BB6A", "#FF9800", "#AB47BC"];
+
+function ComicLoading() {
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.2,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+      ]),
+    ).start();
+  }, []);
+
+  return (
+    <View style={styles.loadingContainer}>
+      <View style={styles.loadingBox}>
+        <Text style={styles.thinkingLabel}>THINKING...</Text>
+        <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
+          <Ionicons name="flash" size={60} color="#000" />
+        </Animated.View>
+        <View style={styles.spinnerWrapper}>
+          <ActivityIndicator size="small" color="#000" />
+        </View>
+      </View>
+      <Text style={styles.loadingText}>BUILDING A SENTENCE</Text>
+    </View>
+  );
+}
 
 export default function Index() {
   const [sentence, setSentence] = useState("");
@@ -103,18 +140,12 @@ export default function Index() {
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
         <Header
-          title="Pradctice"
+          title="Practice"
           onBack={() => router.replace("/grammar")}
         />
 
         {loading ? (
-          <View style={styles.loadingContainer}>
-            <View style={styles.spinnerOutline}>
-              <ActivityIndicator size="large" color="#efff09" />
-            </View>
-
-            <Text style={styles.loadingText}>Building a sentence…</Text>
-          </View>
+          <ComicLoading />
         ) : (
           <>
             <TranslateCard
@@ -210,21 +241,37 @@ const styles = StyleSheet.create({
     paddingTop: 80,
   },
 
-  loadingText: {
-    marginTop: 14,
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#555",
-    letterSpacing: 0.3,
+  loadingBox: {
+    backgroundColor: "#FFFF00",
+    borderWidth: 4,
+    borderColor: "black",
+    padding: 30,
+    borderRadius: 20,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 8, height: 8 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    marginBottom: 30,
   },
 
-  spinnerOutline: {
-    width: 30,
-    height: 30,
-    borderRadius: 35,
-    borderWidth: 2,
-    borderColor: "#797979",
-    alignItems: "center",
-    justifyContent: "center",
+  thinkingLabel: {
+    fontSize: 12,
+    fontWeight: "900",
+    color: "black",
+    marginBottom: 10,
+    letterSpacing: 2,
+  },
+
+  spinnerWrapper: {
+    marginTop: 15,
+  },
+
+  loadingText: {
+    fontSize: 24,
+    fontWeight: "900",
+    color: "black",
+    letterSpacing: 1,
+    textAlign: "center",
   },
 });
