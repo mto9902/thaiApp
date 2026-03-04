@@ -5,10 +5,11 @@ import { Ionicons } from '@expo/vector-icons';
 interface TranslateCardProps {
   thai: string;
   romanization: string;
+  english?: string;
   grammarPoint?: string;
 }
 
-export default function TranslateCard({ thai, romanization, grammarPoint = "FORMING QUESTIONS" }: TranslateCardProps) {
+export default function TranslateCard({ thai, romanization, english, grammarPoint = "FORMING QUESTIONS" }: TranslateCardProps) {
   return (
     <View style={styles.outerContainer}>
       <View style={styles.card}>
@@ -26,6 +27,13 @@ export default function TranslateCard({ thai, romanization, grammarPoint = "FORM
         <View style={styles.divider} />
 
         <Text style={styles.romanizationText}>"{romanization}"</Text>
+
+        {english && (
+          <View style={styles.englishContainer}>
+            <Text style={styles.englishLabel}>ENGLISH TRANSLATION</Text>
+            <Text style={styles.englishText}>{english}</Text>
+          </View>
+        )}
       </View>
     </View>
   );
@@ -96,5 +104,29 @@ const styles = StyleSheet.create({
     color: '#757575', // Medium grey
     textAlign: 'center',
     fontWeight: '600',
+  },
+  englishContainer: {
+    marginTop: 20,
+    backgroundColor: '#FAFAFA', // Very light grey
+    padding: 15,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#E0E0E0',
+    borderStyle: 'dashed',
+    width: '100%',
+    alignItems: 'center',
+  },
+  englishLabel: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#9E9E9E',
+    marginBottom: 4,
+    letterSpacing: 1,
+  },
+  englishText: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#333',
+    textAlign: 'center',
   },
 });
