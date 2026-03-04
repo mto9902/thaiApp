@@ -3,7 +3,6 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 
 import {
-  ActivityIndicator,
   Animated,
   Easing,
   SafeAreaView,
@@ -47,10 +46,12 @@ function ComicLoading() {
     <View style={styles.loadingContainer}>
       <View style={styles.loadingBox}>
         <Text style={styles.thinkingLabel}>THINKING...</Text>
+
         <Animated.View style={{ transform: [{ rotate: spin }] }}>
           <Ionicons name="sync-outline" size={60} color="#000" />
         </Animated.View>
       </View>
+
       <Text style={styles.loadingText}>BUILDING A SENTENCE</Text>
     </View>
   );
@@ -62,6 +63,7 @@ export default function Index() {
   const [translation, setTranslation] = useState("");
   const [grammarPoint, setGrammarPoint] = useState<any>(null);
   const [words, setWords] = useState<any[]>([]);
+  const [breakdown, setBreakdown] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
   const { grammar } = useLocalSearchParams();
@@ -116,6 +118,8 @@ export default function Index() {
           (result.breakdown || []).map((w: any) => w.english).join(" "),
       );
 
+      setBreakdown(result.breakdown || []);
+
       const formattedWords = (result.breakdown || []).map(
         (w: any, i: number) => ({
           thai: w.thai,
@@ -136,17 +140,15 @@ export default function Index() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
-        <Header
-          title="Practice"
-          onBack={() => router.replace("/grammar")}
-        />
+        <Header title="Practice" onBack={() => router.replace("/grammar")} />
 
         {loading ? (
           <ComicLoading />
         ) : (
           <>
             <TranslateCard
-              thai={sentence}
+              sentence={sentence}
+              breakdown={breakdown}
               romanization={romanization}
               english={translation}
               grammarPoint={grammarPoint?.title}

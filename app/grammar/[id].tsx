@@ -1,17 +1,17 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
+  Alert,
+  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  SafeAreaView,
-  Alert,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 
-import { grammarPoints } from "../../src/data/grammar";
 import Header from "../../src/components/Header";
+import { grammarPoints } from "../../src/data/grammar";
 
 export default function GrammarDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -105,10 +105,12 @@ export default function GrammarDetail() {
                   style={[
                     styles.breakdownCard,
                     {
-                      backgroundColor:
-                        ["#FFCC00", "#FF66CC", "#66CCFF", "#99FF66"][
-                          index % 4
-                        ],
+                      backgroundColor: [
+                        "#FFCC00",
+                        "#FF66CC",
+                        "#66CCFF",
+                        "#99FF66",
+                      ][index % 4],
                     },
                   ]}
                 >
