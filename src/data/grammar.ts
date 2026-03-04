@@ -1,10 +1,71 @@
-export const grammarPoints = [
+export interface GrammarPoint {
+  id: string;
+  title: string;
+  aiPrompt: string;
+  level: number;
+  explanation?: string;
+  pattern?: string;
+  example?: {
+    thai: string;
+    roman: string;
+    english: string;
+    breakdown: { thai: string; english: string }[];
+  };
+  focus?: {
+    particle: string;
+    meaning: string;
+  };
+}
+
+export const grammarPoints: GrammarPoint[] = [
   {
     id: "svo",
     title: "Basic Sentence Order (SVO)",
     aiPrompt:
       "Create a simple Thai sentence using the basic Subject Verb Object structure.",
     level: 1,
+    explanation:
+      "Thai follows the Subject-Verb-Object (SVO) order, similar to English. This is the foundation of most basic Thai sentences.",
+    pattern: "SUBJECT + VERB + OBJECT",
+    example: {
+      thai: "ผมกินข้าว",
+      roman: "phǒm gin kâao",
+      english: "I eat rice.",
+      breakdown: [
+        { thai: "ผม", english: "I (masculine)" },
+        { thai: "กิน", english: "eat" },
+        { thai: "ข้าว", english: "rice" },
+      ],
+    },
+    focus: {
+      particle: "SVO Order",
+      meaning: "The basic way to structure a sentence in Thai.",
+    },
+  },
+  {
+    id: "negative-mai",
+    title: "Negation using ไม่",
+    aiPrompt:
+      "Create a Thai sentence using ไม่ before the verb to negate the action.",
+    level: 1,
+    explanation:
+      "To make a sentence negative in Thai, you simply place the word 'ไม่' (mâi) before the verb.",
+    pattern: "SUBJECT + ไม่ + VERB",
+    example: {
+      thai: "ฉันไม่กินเผ็ด",
+      roman: "chǎn mâi gin phèt",
+      english: "I don't eat spicy (food).",
+      breakdown: [
+        { thai: "ฉัน", english: "I (feminine/neutral)" },
+        { thai: "ไม่", english: "not" },
+        { thai: "กิน", english: "eat" },
+        { thai: "เผ็ด", english: "spicy" },
+      ],
+    },
+    focus: {
+      particle: "ไม่ (mâi)",
+      meaning: "Used before a verb or adjective to negate it.",
+    },
   },
   {
     id: "present",
@@ -13,18 +74,28 @@ export const grammarPoints = [
     level: 1,
   },
   {
-    id: "negative-mai",
-    title: "Negation using ไม่",
-    aiPrompt:
-      "Create a Thai sentence using ไม่ before the verb to negate the action.",
-    level: 1,
-  },
-  {
     id: "question-mai",
     title: "Yes/No Question using ไหม",
     aiPrompt:
       "Create a Thai yes or no question using the particle ไหม at the end of the sentence.",
     level: 1,
+    explanation:
+      "To ask a yes/no question in Thai, you simply add the question particle 'ไหม' (mǎi) to the end of a statement.",
+    pattern: "STATEMENT + ไหม ?",
+    example: {
+      thai: "คุณสบายดีไหม",
+      roman: "kun sà-baai dee mǎi",
+      english: "Are you well?",
+      breakdown: [
+        { thai: "คุณ", english: "you" },
+        { thai: "สบายดี", english: "well / fine" },
+        { thai: "ไหม", english: "(question particle)" },
+      ],
+    },
+    focus: {
+      particle: "ไหม (mǎi)",
+      meaning: "Placed at the end of a sentence to turn it into a question.",
+    },
   },
   {
     id: "pen-identity",
@@ -32,6 +103,23 @@ export const grammarPoints = [
     aiPrompt:
       "Create a Thai sentence using เป็น to express identity, role, or profession.",
     level: 1,
+    explanation:
+      "The verb 'เป็น' (pen) is used to express identity, such as a profession, role, or identity. It is equivalent to 'to be' in English when followed by a noun.",
+    pattern: "SUBJECT + เป็น + NOUN",
+    example: {
+      thai: "เขาเป็นหมอ",
+      roman: "kǎo bpen mǎor",
+      english: "He is a doctor.",
+      breakdown: [
+        { thai: "เขา", english: "he/she" },
+        { thai: "เป็น", english: "is/am/are (identity)" },
+        { thai: "หมอ", english: "doctor" },
+      ],
+    },
+    focus: {
+      particle: "เป็น (pen)",
+      meaning: "Used for roles, jobs, and identities. Do not use for locations or descriptions.",
+    },
   },
   {
     id: "mee-possession",

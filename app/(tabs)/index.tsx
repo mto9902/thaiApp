@@ -35,7 +35,7 @@ export default function Index() {
 
   useEffect(() => {
     handleGenerate();
-  }, []);
+  }, [grammar]);
 
   function getRandomWords(count = 3) {
     const selected: string[] = [];
