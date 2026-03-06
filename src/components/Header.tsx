@@ -11,7 +11,7 @@ export default function Header({ title, onBack }: HeaderProps) {
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.iconButton} onPress={onBack}>
-        <Ionicons name="arrow-back" size={24} color="black" />
+        <Ionicons name="close-outline" size={24} color="black" />
       </TouchableOpacity>
 
       <View style={styles.titleContainer}>

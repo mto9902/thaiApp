@@ -1,16 +1,16 @@
-export async function generateSentence(words: string[], grammar: string) {
+import { sessionId } from "../session/session";
+
+export async function generateSentence(grammar: string) {
   const res = await fetch("http://192.168.1.121:3000/generate", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      words,
       grammar,
+      sessionId,
     }),
   });
 
-  const data = await res.json();
-
-  return data;
+  return res.json();
 }

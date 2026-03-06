@@ -1,15 +1,13 @@
-import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as Speech from "expo-speech";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
-  Animated,
-  Easing,
   SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from "react-native";
 
@@ -19,53 +17,40 @@ import TranslateCard from "../../src/components/TranslateCard";
 import WordCard from "../../src/components/WordCard";
 
 import { generateSentence } from "../../src/api/generateSentence";
+import { generateTransform } from "../../src/api/generateTransform";
+
 import { grammarPoints } from "../../src/data/grammar";
-import { vocabulary } from "../../src/data/words";
 
 const COLORS = ["#42A5F5", "#FF4081", "#66BB6A", "#FF9800", "#AB47BC"];
 
-function ComicLoading() {
-  const rotateAnim = useRef(new Animated.Value(0)).current;
+type TransformOption = {
+  thai: string;
+  romanization: string;
+  english: string;
+};
 
-  useEffect(() => {
-    Animated.loop(
-      Animated.timing(rotateAnim, {
-        toValue: 1,
-        duration: 1200,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      }),
-    ).start();
-  }, []);
-
-  const spin = rotateAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["0deg", "360deg"],
-  });
-
-  return (
-    <View style={styles.loadingContainer}>
-      <View style={styles.loadingBox}>
-        <Text style={styles.thinkingLabel}>THINKING...</Text>
-
-        <Animated.View style={{ transform: [{ rotate: spin }] }}>
-          <Ionicons name="sync-outline" size={60} color="#000" />
-        </Animated.View>
-      </View>
-
-      <Text style={styles.loadingText}>BUILDING A SENTENCE</Text>
-    </View>
-  );
-}
-
-export default function Index() {
+export default function Practice() {
   const [sentence, setSentence] = useState("");
   const [romanization, setRomanization] = useState("");
   const [translation, setTranslation] = useState("");
   const [grammarPoint, setGrammarPoint] = useState<any>(null);
+
   const [words, setWords] = useState<any[]>([]);
   const [breakdown, setBreakdown] = useState<any[]>([]);
+
   const [loading, setLoading] = useState(false);
+
+  const [exerciseType, setExerciseType] = useState<
+    "rapid" | "wordOrder" | "transform"
+  >("rapid");
+
+  const [builtSentence, setBuiltSentence] = useState<string[]>([]);
+  const [resultMessage, setResultMessage] = useState("");
+
+  const [transformOptions, setTransformOptions] = useState<TransformOption[]>(
+    [],
+  );
+  const [correctIndex, setCorrectIndex] = useState<number | null>(null);
 
   const { grammar } = useLocalSearchParams();
   const router = useRouter();
@@ -74,23 +59,10 @@ export default function Index() {
     handleGenerate();
   }, [grammar]);
 
-  const speakWord = (word: string) => {
-    Speech.stop();
-    Speech.speak(word, {
-      language: "th-TH",
-      rate: 0.9,
-    });
-  };
-
-  function getRandomWords(count = 3) {
-    const selected: string[] = [];
-
-    for (let i = 0; i < count; i++) {
-      const word = vocabulary[Math.floor(Math.random() * vocabulary.length)];
-      selected.push(word);
-    }
-
-    return selected;
+  function nextExerciseType(current: string) {
+    if (current === "rapid") return "wordOrder";
+    if (current === "wordOrder") return "transform";
+    return "rapid";
   }
 
   function getRandomGrammar() {
@@ -101,11 +73,23 @@ export default function Index() {
     return grammarPoints.find((g) => g.id === id);
   }
 
+  function shuffleWordsNotCorrectOrder(formattedWords: any[], correct: any[]) {
+    let shuffled;
+
+    do {
+      shuffled = [...formattedWords].sort(() => Math.random() - 0.5);
+    } while (
+      JSON.stringify(shuffled.map((w) => w.thai)) ===
+      JSON.stringify(correct.map((w) => w.thai))
+    );
+
+    return shuffled;
+  }
+
   const handleGenerate = async () => {
     try {
       setLoading(true);
-
-      const randomWords = getRandomWords(3);
+      setResultMessage("");
 
       const grammarObject =
         typeof grammar === "string"
@@ -114,36 +98,128 @@ export default function Index() {
 
       setGrammarPoint(grammarObject);
 
-      const result = await generateSentence(
-        randomWords,
-        grammarObject.aiPrompt,
-      );
+      const nextType = nextExerciseType(exerciseType);
+      setExerciseType(nextType);
 
-      setSentence(result.sentence);
-      setRomanization(result.romanization);
+      if (nextType === "transform") {
+        const prompt = `
+${grammarObject.aiPrompt}
 
-      setTranslation(
-        result.translation ||
-          (result.breakdown || []).map((w: any) => w.english).join(" "),
-      );
+Create a Thai grammar transformation exercise.
 
-      setBreakdown(result.breakdown || []);
+STEP 1
+Create a base sentence WITHOUT the grammar rule.
 
-      const formattedWords = (result.breakdown || []).map(
-        (w: any, i: number) => ({
-          thai: w.thai,
-          english: w.english.toUpperCase(),
+STEP 2
+Create three new sentences based on that sentence.
+
+Rules:
+- One sentence must correctly apply the grammar rule
+- Two sentences must contain realistic grammar mistakes
+- Reuse the same words from the base sentence whenever possible
+
+Return ONLY JSON:
+
+{
+  "base_sentence":{
+    "thai":"",
+    "romanization":"",
+    "english":""
+  },
+  "options":[
+    {"thai":"","romanization":"","english":""},
+    {"thai":"","romanization":"","english":""},
+    {"thai":"","romanization":"","english":""}
+  ],
+  "correct_index":0
+}
+`;
+
+        const transform = await generateTransform(prompt);
+
+        setSentence(transform?.base_sentence?.thai || "");
+        setRomanization(transform?.base_sentence?.romanization || "");
+        setTranslation(transform?.base_sentence?.english || "");
+
+        setTransformOptions(transform?.options || []);
+        setCorrectIndex(transform?.correct_index ?? null);
+
+        setWords([]);
+        setBreakdown([]);
+      } else {
+        const result = await generateSentence(grammarObject.aiPrompt);
+
+        setSentence(result?.sentence || "");
+        setRomanization(result?.romanization || "");
+
+        setTranslation(
+          result?.translation ||
+            (result?.breakdown || [])
+              .map((w: any) => w?.english || "")
+              .join(" "),
+        );
+
+        const safeBreakdown = result?.breakdown || [];
+        setBreakdown(safeBreakdown);
+
+        const formattedWords = safeBreakdown.map((w: any, i: number) => ({
+          thai: w?.thai || "",
+          english: (w?.english || "").toUpperCase(),
           color: COLORS[i % COLORS.length],
           rotation: Math.random() * 6 - 3,
-        }),
-      );
+        }));
 
-      setWords(formattedWords);
+        const shuffled = shuffleWordsNotCorrectOrder(
+          formattedWords,
+          safeBreakdown,
+        );
+
+        setWords(shuffled);
+      }
+
+      setBuiltSentence([]);
     } catch (error) {
       console.error("Generation failed:", error);
     } finally {
       setLoading(false);
     }
+  };
+
+  function handleWordTap(word: string) {
+    setBuiltSentence([...builtSentence, word]);
+  }
+
+  function undoLastWord() {
+    setBuiltSentence((prev) => prev.slice(0, -1));
+  }
+
+  function resetSentence() {
+    setBuiltSentence([]);
+  }
+
+  function checkAnswer() {
+    const correct = breakdown.map((w: any) => w?.thai || "");
+
+    const isCorrect = JSON.stringify(correct) === JSON.stringify(builtSentence);
+
+    setResultMessage(isCorrect ? "Correct!" : "Try again");
+  }
+
+  function checkTransform(index: number) {
+    if (correctIndex === null) return;
+
+    setResultMessage(index === correctIndex ? "Correct!" : "Try again");
+  }
+
+  const speakWord = (word: string) => {
+    if (!word) return;
+
+    Speech.stop();
+
+    Speech.speak(word, {
+      language: "th-TH",
+      rate: 0.9,
+    });
   };
 
   return (
@@ -155,51 +231,118 @@ export default function Index() {
         />
 
         {loading ? (
-          <ComicLoading />
+          <Text style={{ textAlign: "center", marginTop: 40 }}>Loading...</Text>
         ) : (
           <>
-            <TranslateCard
-              sentence={sentence}
-              breakdown={breakdown}
-              romanization={romanization}
-              english={translation}
-              grammarPoint={grammarPoint?.title}
-            />
+            {exerciseType === "rapid" && (
+              <>
+                <TranslateCard
+                  sentence={sentence}
+                  breakdown={breakdown}
+                  romanization={romanization}
+                  english={translation}
+                  grammarPoint={grammarPoint?.title}
+                />
 
-            <View style={styles.wordScrapsSection}>
-              <View style={styles.wordScrapsHeader}>
-                <Ionicons name="cut-outline" size={24} color="black" />
-                <Text style={styles.wordScrapsTitle}>WORDSCRAPS</Text>
-              </View>
+                <View style={styles.wordScrapsSection}>
+                  <Text style={styles.wordScrapsTitle}>WORDSCRAPS</Text>
 
-              <View style={styles.wordCardsGrid}>
-                <View style={styles.row}>
-                  {words.slice(0, 4).map((word, idx) => (
+                  <View style={styles.wordCardsGrid}>
+                    {words.map((word, idx) => (
+                      <WordCard
+                        key={idx}
+                        thai={word.thai}
+                        english={word.english}
+                        backgroundColor={word.color}
+                        rotation={word.rotation}
+                        onPress={() => speakWord(word.thai)}
+                      />
+                    ))}
+                  </View>
+                </View>
+              </>
+            )}
+
+            {exerciseType === "wordOrder" && (
+              <View style={styles.wordScrapsSection}>
+                <Text style={styles.wordScrapsTitle}>BUILD THE SENTENCE</Text>
+
+                <View style={styles.builder}>
+                  {builtSentence.map((word, i) => (
+                    <Text key={i} style={styles.builderWord}>
+                      {word}
+                    </Text>
+                  ))}
+                </View>
+
+                <View style={styles.controls}>
+                  <TouchableOpacity
+                    style={styles.controlButton}
+                    onPress={undoLastWord}
+                  >
+                    <Text style={styles.controlText}>Undo</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.controlButton}
+                    onPress={resetSentence}
+                  >
+                    <Text style={styles.controlText}>Reset</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.wordCardsGrid}>
+                  {words.map((word, idx) => (
                     <WordCard
                       key={idx}
                       thai={word.thai}
                       english={word.english}
                       backgroundColor={word.color}
                       rotation={word.rotation}
-                      onPress={() => speakWord(word.thai)}
+                      onPress={() => handleWordTap(word.thai)}
                     />
                   ))}
                 </View>
 
-                <View style={styles.row}>
-                  {words.slice(4).map((word, idx) => (
-                    <WordCard
-                      key={idx}
-                      thai={word.thai}
-                      english={word.english}
-                      backgroundColor={word.color}
-                      rotation={word.rotation}
-                      onPress={() => speakWord(word.thai)}
-                    />
-                  ))}
-                </View>
+                <GenerateButton title="Check" onPress={checkAnswer} />
+
+                {resultMessage !== "" && (
+                  <Text style={styles.resultText}>{resultMessage}</Text>
+                )}
               </View>
-            </View>
+            )}
+
+            {exerciseType === "transform" && (
+              <View style={styles.transformBox}>
+                <Text style={styles.transformInstruction}>
+                  Apply the grammar rule
+                </Text>
+
+                <Text style={styles.transformSentence}>{sentence}</Text>
+                <Text style={styles.transformRomanization}>{romanization}</Text>
+                <Text style={styles.transformTranslation}>{translation}</Text>
+
+                {transformOptions.map((opt, i) => (
+                  <TouchableOpacity
+                    key={i}
+                    style={styles.transformOption}
+                    onPress={() => checkTransform(i)}
+                  >
+                    <Text style={styles.optionThai}>{opt?.thai || ""}</Text>
+                    <Text style={styles.optionRomanization}>
+                      {opt?.romanization || ""}
+                    </Text>
+                    <Text style={styles.optionEnglish}>
+                      {opt?.english || ""}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+
+                {resultMessage !== "" && (
+                  <Text style={styles.resultText}>{resultMessage}</Text>
+                )}
+              </View>
+            )}
 
             <GenerateButton onPress={handleGenerate} />
           </>
@@ -212,48 +355,121 @@ export default function Index() {
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: "#F5F5F5" },
   container: { paddingBottom: 40 },
-  wordScrapsSection: { marginTop: 40, paddingHorizontal: 20 },
-  wordScrapsHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 20,
+
+  wordScrapsSection: {
+    marginTop: 40,
+    paddingHorizontal: 20,
   },
+
   wordScrapsTitle: {
     fontSize: 22,
     fontWeight: "900",
-    marginLeft: 10,
-    letterSpacing: 1,
+    marginBottom: 20,
   },
-  wordCardsGrid: { alignItems: "center" },
-  row: {
+
+  builder: {
+    minHeight: 60,
+    borderWidth: 3,
+    borderColor: "black",
+    marginBottom: 20,
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "center",
-    marginBottom: 10,
-  },
-  loadingContainer: {
     alignItems: "center",
-    justifyContent: "center",
-    paddingTop: 80,
+    padding: 10,
   },
-  loadingBox: {
-    backgroundColor: "#FFFF00",
-    borderWidth: 4,
-    borderColor: "black",
-    padding: 30,
-    borderRadius: 20,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 8, height: 8 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-    marginBottom: 30,
-  },
-  thinkingLabel: {
-    fontSize: 12,
+
+  builderWord: {
+    fontSize: 24,
     fontWeight: "900",
-    marginBottom: 10,
-    letterSpacing: 2,
+    marginHorizontal: 6,
   },
-  loadingText: { fontSize: 24, fontWeight: "900", textAlign: "center" },
+
+  controls: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginBottom: 20,
+  },
+
+  controlButton: {
+    backgroundColor: "#000",
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    marginHorizontal: 8,
+    borderRadius: 8,
+  },
+
+  controlText: {
+    color: "white",
+    fontWeight: "700",
+  },
+
+  wordCardsGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+  },
+
+  transformBox: {
+    marginTop: 40,
+    paddingHorizontal: 20,
+  },
+
+  transformInstruction: {
+    fontSize: 18,
+    fontWeight: "700",
+    marginBottom: 20,
+    textAlign: "center",
+  },
+
+  transformSentence: {
+    fontSize: 28,
+    fontWeight: "900",
+    textAlign: "center",
+  },
+
+  transformRomanization: {
+    textAlign: "center",
+    marginTop: 6,
+  },
+
+  transformTranslation: {
+    textAlign: "center",
+    marginBottom: 20,
+    fontSize: 16,
+    color: "#555",
+  },
+
+  transformOption: {
+    backgroundColor: "white",
+    borderWidth: 2,
+    borderColor: "black",
+    padding: 14,
+    marginBottom: 12,
+  },
+
+  optionThai: {
+    fontSize: 22,
+    fontWeight: "800",
+    textAlign: "center",
+  },
+
+  optionRomanization: {
+    fontSize: 16,
+    textAlign: "center",
+    marginTop: 4,
+  },
+
+  optionEnglish: {
+    fontSize: 16,
+    textAlign: "center",
+    color: "#555",
+  },
+
+  resultText: {
+    textAlign: "center",
+    fontSize: 20,
+    fontWeight: "900",
+    marginTop: 10,
+  },
 });
